@@ -30,14 +30,14 @@ static int send_udp_cmd(int socket_fd, int port, short mode) {
 //"\x00\x01\x00\x01\x00\x00\x00"
 	memset(udp_command,'\0', 8);
 //	strcpy(udp_command, "\x01\x00\x00\x01\x00\x00\x00");
+	memset(udp_command,'\0', 8);
 	udp_command[0] = 0x00;
 	udp_command[1] = 0x02;
 	udp_command[2] = 0x00;
 	udp_command[3] = 0x01;
 	udp_command[4] = 0x00;
 	udp_command[5] = 0xaa;
-	memset(udp_command,'\0', 8);
-	memcpy(udp_command, "\x00\x02\x00\x01\x00\xFF\x00\x01",8);
+//	memcpy(udp_command, "\x00\x02\x00\x01\x00\xFF\x00\x01",8);
 		if (sendto(socket_fd, udp_command, 8,
 				0 , (struct sockaddr*)&server_addr,
 				sizeof(server_addr)) < 0) {
@@ -45,10 +45,22 @@ static int send_udp_cmd(int socket_fd, int port, short mode) {
 			return -1;
 		}
 
-	for (int k= 0;k<8;k++) {
-		printf("lol %02x\n",udp_command[k]);
-	}
+	//for (int k= 0;k<8;k++) {
+	//	printf("lol %02x\n",udp_command[k]);
+//	}
 //		return 0;
+	for (int i= 0;i<256;i++) {
+		udp_command[4] = 0x00 + i;
+		for (int j= 0;j<256;j++) {
+			udp_command[5] = 0x00 + j;
+			if (sendto(socket_fd, udp_command, 8,
+					0 , (struct sockaddr*)&server_addr,
+					sizeof(server_addr)) < 0) {
+				printf("Unable to send message\n");
+				return -1;
+			}
+		}
+	}
 
 	if (sendto(socket_fd, udp_command, 8,
 			0 , (struct sockaddr*)&server_addr,
@@ -74,6 +86,8 @@ int main_loop(unsigned freq_ms, bool server_ctrl) {
 		if (socket_fd[i] == -1)
 			return -1;
 	}
+	send_udp_cmd(socket_fd[0], 4000, MODE_1);
+	return 1;
 	while(1) {
 		for (i = 1; i < 4; i++) {
 			msg = read_from_port(socket_fd[i], ports[i], buffer,
