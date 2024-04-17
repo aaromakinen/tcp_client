@@ -1,5 +1,13 @@
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-Wall 
 
-client1: client1.o socket.o
-	$(CC) -o client1 client1.o socket.o
+all: client1 client2
+clean: 
+	rm client1 client1.o client2 client2.o
+
+.PHONY: all
+
+client1: client1.o socket.o socket_reader.o
+	$(CC) -o client1 client1.o socket.o socket_reader.o
+client2: client2.o socket.o socket_reader.o
+	$(CC) -o client2 client2.o socket.o socket_reader.o

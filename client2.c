@@ -1,8 +1,7 @@
+#include "socket_reader.h"
 #include <stdbool.h>
 
-#include "socket_reader.h"
-
 int main(int argc, char *argv[]) {
-	main_loop(100, false);
+	main_loop(100, true);
 	return 0;
 }

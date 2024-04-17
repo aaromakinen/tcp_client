@@ -2,16 +2,19 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include "socket.h"
 
-int init_socket(char* ip_addr, int port) {
+int init_socket(char* ip_addr, int port, bool udp) {
 	int socket_fd;
 	struct sockaddr_in server_addr;
 
-	socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+	socket_fd = socket(AF_INET, udp ? SOCK_DGRAM : SOCK_STREAM, 0);
 	if(socket_fd < 0){
 	    printf("Unable to create socket\n");
 	    return -1;
 	}
+	if (udp)
+		return socket_fd;
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
 	server_addr.sin_addr.s_addr = inet_addr(ip_addr);
@@ -29,7 +32,6 @@ char* read_from_port(int socket_fd, int port, char* msg, size_t len) {
 	char *value;
 
 	memset(msg,'\0', len);
-	msg[99] = '\0';
 	if(recv(socket_fd, msg, len-1, MSG_DONTWAIT) < 0){
 		value = "--";
 	}
