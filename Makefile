@@ -7,7 +7,7 @@ clean:
 
 .PHONY: all
 
-client1: client1.o socket.o socket_reader.o
-	$(CC) -o client1 client1.o socket.o socket_reader.o
-client2: client2.o socket.o socket_reader.o
-	$(CC) -o client2 client2.o socket.o socket_reader.o
+client1: client1.o socket.o socket_handler.o
+	$(CC) -o client1 client1.o socket.o socket_handler.o
+client2: client2.o socket.o socket_handler.o
+	$(CC) -o client2 client2.o socket.o socket_handler.o
