@@ -68,7 +68,6 @@ int main_loop(unsigned freq_ms, bool server_ctrl) {
 		}
 		if (server_ctrl && isdigit(output[2][0])) {
 			converted = strtol(output[2], NULL, 10);
-			printf("%ld\n",converted);
 			if (converted >= 3 && mode != MODE_1) {
 				send_udp_cmd(socket_fd[0], 4000, MODE_1);
 				mode = MODE_1;
