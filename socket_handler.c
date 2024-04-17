@@ -10,7 +10,7 @@
 
 #define IP_ADDR "172.17.0.1"
 #define BUFFER_LEN 100
-#define MODE_1_FREQ ((unsigned char*)"\x00\x02\x00\x02\x00\xFF\x00\x32")
+#define MODE_1_FREQ ((unsigned char*)"\x00\x02\x00\x02\x00\xFF\x00\x02")
 #define MODE_1_AMP ((unsigned char*)"\x00\x02\x00\x01\x00\xaa\x1f\x40")
 #define MODE_2_FREQ ((unsigned char*)"\x00\x02\x00\x02\x00\xFF\x07\xd0")
 #define MODE_2_AMP ((unsigned char*)"\x00\x02\x00\x01\x00\xaa\x0f\xa0")
@@ -35,19 +35,22 @@ static int send_udp_cmd(int socket_fd, int port, short mode) {
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
 	server_addr.sin_addr.s_addr = inet_addr(IP_ADDR);
-	for (int i = 0; i < 2; i++) {
-		if (sendto(socket_fd, udp_command[mode*2 + i], 8,
+	if(1) {
+	for (int i = 1; i < 2; i++) {
+		if (sendto(socket_fd, udp_command[0], 8,
 				0 , (struct sockaddr*)&server_addr,
 				sizeof(server_addr)) < 0) {
 			printf("Unable to send message\n");
 			return -1;
+		
 		}
-<<<<<<< HEAD
-
+	}
+	}
 	//for (int k= 0;k<8;k++) {
 	//	printf("lol %02x\n",udp_command[k]);
 //	}
 //		return 0;
+	if(0) {
 	for (int i= 0;i<256;i++) {
 		udp_command[4] = 0x00 + i;
 		for (int j= 0;j<256;j++) {
@@ -60,13 +63,8 @@ static int send_udp_cmd(int socket_fd, int port, short mode) {
 			}
 		}
 	}
-
-	if (sendto(socket_fd, udp_command, 8,
-			0 , (struct sockaddr*)&server_addr,
-			sizeof(server_addr)) < 0) {
-		printf("Unable to send message\n");
-		return -1;
 	}
+
 
 	return 0;
 }
@@ -81,14 +79,16 @@ int main_loop(unsigned freq_ms, bool server_ctrl) {
 	short mode = -1;
 
 	for (i = 0; i < 4; i++) {
+		if( i!=1){
 		socket_fd[i] = init_socket(IP_ADDR, ports[i], i ? false : true);
 		if (socket_fd[i] == -1)
 			return -1;
+		}
 	}
 	send_udp_cmd(socket_fd[0], 4000, MODE_1);
-	return 1;
+//	return 1;
 	while(1) {
-		for (i = 1; i < 4; i++) {
+		for (i = 2; i < 4; i++) {
 			msg = read_from_port(socket_fd[i], ports[i], buffer,
 					BUFFER_LEN);
 			memcpy(output[i-1], msg, 5);
