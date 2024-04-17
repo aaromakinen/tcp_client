@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,9 +10,12 @@
 
 #define IP_ADDR "172.17.0.1"
 #define BUFFER_LEN 100
-#define MODE_1 1
-#define MODE_2 2
-#define MODE_1_FREQ "\x00\x02\x00\x01\x00\xFF\x00\x01"
+#define MODE_1_FREQ ((unsigned char*)"\x00\x02\x00\x02\x00\xFF\x00\x32")
+#define MODE_1_AMP ((unsigned char*)"\x00\x02\x00\x01\x00\xaa\x1f\x40")
+#define MODE_2_FREQ ((unsigned char*)"\x00\x02\x00\x02\x00\xFF\x07\xd0")
+#define MODE_2_AMP ((unsigned char*)"\x00\x02\x00\x01\x00\xaa\x0f\xa0")
+#define MODE_1 0
+#define MODE_2 1
 
 static long long time_in_ms(void) {
     struct timeval tv;
@@ -22,28 +26,23 @@ static long long time_in_ms(void) {
 
 static int send_udp_cmd(int socket_fd, int port, short mode) {
 	struct sockaddr_in server_addr;
-	unsigned char udp_command[8];
-			//= { "\x01\x00\x65\x01\x00\x00\x00" };
+	const unsigned char *udp_command[4] = {
+		MODE_1_FREQ,
+		MODE_1_AMP,
+		MODE_2_FREQ,
+		MODE_2_AMP,
+	};
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
 	server_addr.sin_addr.s_addr = inet_addr(IP_ADDR);
-//"\x00\x01\x00\x01\x00\x00\x00"
-	memset(udp_command,'\0', 8);
-//	strcpy(udp_command, "\x01\x00\x00\x01\x00\x00\x00");
-	memset(udp_command,'\0', 8);
-	udp_command[0] = 0x00;
-	udp_command[1] = 0x02;
-	udp_command[2] = 0x00;
-	udp_command[3] = 0x01;
-	udp_command[4] = 0x00;
-	udp_command[5] = 0xaa;
-//	memcpy(udp_command, "\x00\x02\x00\x01\x00\xFF\x00\x01",8);
-		if (sendto(socket_fd, udp_command, 8,
+	for (int i = 0; i < 2; i++) {
+		if (sendto(socket_fd, udp_command[mode*2 + i], 8,
 				0 , (struct sockaddr*)&server_addr,
 				sizeof(server_addr)) < 0) {
 			printf("Unable to send message\n");
 			return -1;
 		}
+<<<<<<< HEAD
 
 	//for (int k= 0;k<8;k++) {
 	//	printf("lol %02x\n",udp_command[k]);
@@ -79,7 +78,7 @@ int main_loop(unsigned freq_ms, bool server_ctrl) {
 	int socket_fd[4], i;
 	int ports[4] = { 4000, 4001, 4002, 4003 };
 	long converted;
-	short mode = 0;
+	short mode = -1;
 
 	for (i = 0; i < 4; i++) {
 		socket_fd[i] = init_socket(IP_ADDR, ports[i], i ? false : true);
@@ -94,13 +93,15 @@ int main_loop(unsigned freq_ms, bool server_ctrl) {
 					BUFFER_LEN);
 			memcpy(output[i-1], msg, 5);
 		}
-		if (server_ctrl) {
+		if (server_ctrl && isdigit(output[2][0])) {
 			converted = strtol(output[2], NULL, 10);
 			if (converted >= 3 && mode != MODE_1) {
 				send_udp_cmd(socket_fd[0], 4000, MODE_1);
+				mode = MODE_1;
 			}
 			else if (converted < 3 && mode != MODE_2) {
 				send_udp_cmd(socket_fd[0], 4000, MODE_2);
+				mode = MODE_2;
 			}
 		}
 
