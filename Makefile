@@ -3,7 +3,7 @@ CFLAGS=-Wall
 
 all: client1 client2
 clean: 
-	rm client1 client1.o client2 client2.o
+	$(RM) client1 client2 *.o
 
 .PHONY: all
 
