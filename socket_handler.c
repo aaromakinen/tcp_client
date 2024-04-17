@@ -26,36 +26,62 @@ static long long time_in_ms(void) {
 
 static int send_udp_cmd(int socket_fd, int port, short mode) {
 	struct sockaddr_in server_addr;
-	const unsigned char *udp_command[4] = {
+	unsigned char *udp_command[4] = {
 		MODE_1_FREQ,
 		MODE_1_AMP,
 		MODE_2_FREQ,
 		MODE_2_AMP,
 	};
+	unsigned char udp_commands[8];
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
 	server_addr.sin_addr.s_addr = inet_addr(IP_ADDR);
-	if(1) {
-	for (int i = 1; i < 2; i++) {
-		if (sendto(socket_fd, udp_command[0], 8,
-				0 , (struct sockaddr*)&server_addr,
-				sizeof(server_addr)) < 0) {
-			printf("Unable to send message\n");
-			return -1;
-		
-		}
-	}
-	}
-	//for (int k= 0;k<8;k++) {
-	//	printf("lol %02x\n",udp_command[k]);
-//	}
-//		return 0;
-	if(0) {
+	memset(udp_command,'\0', 8);
+       udp_commands[0] = 0x00;
+       udp_commands[1] = 0x01;
+       udp_commands[2] = 0x00;
+       udp_commands[3] = 0x03;
+       udp_commands[4] = 0x00;
+       udp_commands[5] = 0xff;
+       udp_commands[6] = 0x07;
+       udp_commands[7] = 0xc0;
+       if(0) {
+       /*if (sendto(socket_fd, "\x00\x01\x00\x03\x00\xff", 6,
+		       0 , (struct sockaddr*)&server_addr,
+		       sizeof(server_addr)) < 0) {
+	       printf("Unable to send message\n");
+	       return -1;
+       }
+       return 0;*/
+	       for (int i = 1; i < 2; i++) {
+		       if (sendto(socket_fd, udp_commands, 8,
+				       0 , (struct sockaddr*)&server_addr,
+				       sizeof(server_addr)) < 0) {
+			       printf("Unable to send message\n");
+			       return -1;
+
+		       }
+	       }
+       
+       if (sendto(socket_fd, "\x00\x01\x00\x01\x00\xff", 6,
+		       0 , (struct sockaddr*)&server_addr,
+		       sizeof(server_addr)) < 0) {
+	       printf("Unable to send message\n");
+	       return -1;
+       }
+       return 0;
+
+       for (int k= 0;k<8;k++) {
+	       printf("char %02x\n",udp_commands[k]);
+       }
+       }
+       //	return 0;
+       if(1) {
 	for (int i= 0;i<256;i++) {
-		udp_command[4] = 0x00 + i;
+		udp_commands[4] = 0x00 + i;
 		for (int j= 0;j<256;j++) {
-			udp_command[5] = 0x00 + j;
-			if (sendto(socket_fd, udp_command, 8,
+			udp_commands[5] = 0x00 + j;
+			if (sendto(socket_fd, udp_commands, 6,
 					0 , (struct sockaddr*)&server_addr,
 					sizeof(server_addr)) < 0) {
 				printf("Unable to send message\n");
@@ -86,7 +112,7 @@ int main_loop(unsigned freq_ms, bool server_ctrl) {
 		}
 	}
 	send_udp_cmd(socket_fd[0], 4000, MODE_1);
-//	return 1;
+	return 1;
 	while(1) {
 		for (i = 2; i < 4; i++) {
 			msg = read_from_port(socket_fd[i], ports[i], buffer,
