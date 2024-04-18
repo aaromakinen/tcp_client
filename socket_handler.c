@@ -66,6 +66,9 @@ int main_loop(unsigned freq_ms, bool server_ctrl) {
 					BUFFER_LEN);
 			memcpy(output[i-1], msg, 5);
 		}
+		/* We assume here that the output of 4003 (out3) will always be
+		 * positive number we so don't care that values below zero
+		 * wouldn't send a command */
 		if (server_ctrl && isdigit(output[2][0])) {
 			converted = strtol(output[2], NULL, 10);
 			if (converted >= 3 && mode != MODE_1) {
@@ -78,7 +81,8 @@ int main_loop(unsigned freq_ms, bool server_ctrl) {
 			}
 		}
 
-		printf("{\"timestamp\": %lld, \"out1\": \"%s\", \"out2\": \"%s\", \"out3\": \"%s\"}\n", time_in_ms(), output[0], output[1], output[2]);
+		printf("{\"timestamp\": %lld, \"out1\": \"%s\", \"out2\": \"%s\", \"out3\": \"%s\"}\n",
+				time_in_ms(), output[0], output[1], output[2]);
 		usleep(freq_ms*1000);
 	}
 }

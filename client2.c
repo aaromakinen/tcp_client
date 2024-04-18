@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include "socket_handler.h"
 
 int main(int argc, char *argv[]) {
